@@ -1,10 +1,9 @@
 package com.bindersfullofcode.bookbot.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class BookGroup {
@@ -15,6 +14,7 @@ public class BookGroup {
     private String name;
     private String description;
     private int pageCount;
+    private List<BookGroupProgress> bookGroupProgressList;
 
     public BookGroup() {
 
@@ -29,6 +29,8 @@ public class BookGroup {
         this.name = name;
         this.description = description;
         this.pageCount = pageCount;
+        this.createDateTime = LocalDateTime.now();
+        this.bookGroupProgressList = new ArrayList<>();
     }
 
     @Id
@@ -79,5 +81,19 @@ public class BookGroup {
 
     public void setPageCount(int pageCount) {
         this.pageCount = pageCount;
+    }
+
+    @OneToMany
+    public List<BookGroupProgress> getBookGroupProgressList() {
+        return bookGroupProgressList;
+    }
+
+    public void setBookGroupProgressList(List<BookGroupProgress> bookGroupProgressList) {
+        this.bookGroupProgressList = bookGroupProgressList;
+    }
+
+    @Transient
+    public void addBookGroupProgress(BookGroupProgress bookGroupProgress) {
+        this.bookGroupProgressList.add(bookGroupProgress);
     }
 }

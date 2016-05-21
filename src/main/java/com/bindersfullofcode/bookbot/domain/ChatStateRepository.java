@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface BookGroupRepository extends CrudRepository<BookGroup, Long> {
+public interface ChatStateRepository extends CrudRepository<ChatState, Long> {
 
-    public Optional<BookGroup> findByChatId(long chatId);
+    Optional<ChatState> findByChatId(long chatId);
 }
