@@ -1,8 +1,6 @@
 package com.bindersfullofcode.bookbot;
 
 import com.bindersfullofcode.bookbot.bot.BookBot;
-import com.bindersfullofcode.bookbot.domain.ChatStateService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package com.bindersfullofcode.bookbot.domain;
+package com.bindersfullofcode.bookbot.domain.chat;
 
 import org.telegram.telegrambots.api.objects.Chat;
 

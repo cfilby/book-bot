@@ -1,4 +1,4 @@
-package com.bindersfullofcode.bookbot.domain;
+package com.bindersfullofcode.bookbot.domain.book;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

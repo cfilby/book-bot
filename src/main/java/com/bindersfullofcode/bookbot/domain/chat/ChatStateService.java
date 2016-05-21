@@ -1,8 +1,7 @@
-package com.bindersfullofcode.bookbot.domain;
+package com.bindersfullofcode.bookbot.domain.chat;
 
 import com.bindersfullofcode.bookbot.bot.BookBotStates;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,12 +25,7 @@ public class ChatStateService {
     }
 
     public void setChatState(long chatId, int state, List<String> stateArgs) {
-        ChatState chatState = getSavedOrDefaultChatState(chatId);
-
-        chatState.setState(state);
-        chatState.setStateArgs(stateArgs);
-        chatState.setLastStateUpdate(LocalDateTime.now());
-
+        ChatState chatState = new ChatState(chatId, state, stateArgs);
         chatStateRepository.save(chatState);
     }
 

@@ -1,4 +1,4 @@
-package com.bindersfullofcode.bookbot.domain;
+package com.bindersfullofcode.bookbot.domain.book;
 
 
 import javax.persistence.*;

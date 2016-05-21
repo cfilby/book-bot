@@ -2,9 +2,9 @@ package com.bindersfullofcode.bookbot.bot;
 
 import com.bindersfullofcode.bookbot.config.BotConfig;
 
-import com.bindersfullofcode.bookbot.domain.BookGroupService;
-import com.bindersfullofcode.bookbot.domain.ChatState;
-import com.bindersfullofcode.bookbot.domain.ChatStateService;
+import com.bindersfullofcode.bookbot.domain.book.BookGroupService;
+import com.bindersfullofcode.bookbot.domain.chat.ChatState;
+import com.bindersfullofcode.bookbot.domain.chat.ChatStateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.TelegramApiException;
@@ -13,11 +13,9 @@ import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
-import java.awt.print.Book;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class BookBot extends TelegramLongPollingBot {
