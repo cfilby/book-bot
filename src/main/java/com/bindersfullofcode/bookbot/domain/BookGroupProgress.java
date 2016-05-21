@@ -1,13 +1,14 @@
 package com.bindersfullofcode.bookbot.domain;
 
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
 public class BookGroupProgress {
 
     private BookGroup bookGroup;
+    private long id;
     private LocalDateTime timestamp;
     private long userId;
     private String username;
@@ -24,12 +25,23 @@ public class BookGroupProgress {
         this.pageNumber = pageNumber;
     }
 
+    @ManyToOne
     public BookGroup getBookGroup() {
         return bookGroup;
     }
 
     public void setBookGroup(BookGroup bookGroup) {
         this.bookGroup = bookGroup;
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public LocalDateTime getTimestamp() {
