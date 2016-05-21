@@ -1,6 +1,8 @@
 package com.bindersfullofcode.bookbot;
 
 import com.bindersfullofcode.bookbot.bot.BookBot;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,6 +13,8 @@ import org.telegram.telegrambots.TelegramBotsApi;
 @SpringBootApplication
 public class BookbotApplication {
 
+	private static final Logger logger = LoggerFactory.getLogger(BookbotApplication.class);
+
 	@Bean
 	public CommandLineRunner bookBotRunner(BookBot bookBot) {
 			return (args) -> {
@@ -18,7 +22,7 @@ public class BookbotApplication {
 				try {
 					telegramBotsApi.registerBot(bookBot);
 				} catch (TelegramApiException e) {
-					e.printStackTrace();
+					logger.error(e.getMessage());
 				}
 			};
 	}

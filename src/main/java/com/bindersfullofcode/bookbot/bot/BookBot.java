@@ -5,6 +5,8 @@ import com.bindersfullofcode.bookbot.config.BotConfig;
 import com.bindersfullofcode.bookbot.domain.book.BookGroupService;
 import com.bindersfullofcode.bookbot.domain.chat.ChatState;
 import com.bindersfullofcode.bookbot.domain.chat.ChatStateService;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.TelegramApiException;
@@ -19,6 +21,8 @@ import java.util.List;
 
 @Component
 public class BookBot extends TelegramLongPollingBot {
+
+    private static final Logger logger = LoggerFactory.getLogger(BookBot.class);
 
     @Autowired
     private ChatStateService chatStateService;
@@ -37,7 +41,7 @@ public class BookBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        System.out.println(update);
+        logger.info(update.toString());
         if (update.hasMessage() && update.getMessage().hasText()) {
             handleIncomingMessage(update.getMessage());
         }
@@ -108,9 +112,9 @@ public class BookBot extends TelegramLongPollingBot {
 
         if (messageText.startsWith(BookBotCommands.START_COMMAND)) {
             sendMessage = handleStartCommand(message);
-        } else if (messageText.startsWith(BookBotCommands.STARTBOOK_COMMAND)) {
+        } else if (messageText.startsWith(BookBotCommands.START_BOOK_COMMAND)) {
             sendMessage = handleStartBookCommand(message);
-        } else if (messageText.startsWith(BookBotCommands.SETPROGRESS_COMMAND)) {
+        } else if (messageText.startsWith(BookBotCommands.SET_PROGRESS_COMMAND)) {
             sendMessage = handleSetProgressCommand(message);
         } else if (messageText.startsWith(BookBotCommands.PROGRESS_COMMAND)) {
             sendMessage = handleProgressCommand(message);
@@ -123,7 +127,7 @@ public class BookBot extends TelegramLongPollingBot {
 
     private SendMessage handleStartCommand(Message message) {
         SendMessage sendMessage = createReplayMessage(message);
-        sendMessage.setText("To get started use the " + BookBotCommands.STARTBOOK_COMMAND + " to specify the book your group is reading!");
+        sendMessage.setText("To get started use the " + BookBotCommands.START_BOOK_COMMAND + " to specify the book your group is reading!");
 
         return sendMessage;
     }
