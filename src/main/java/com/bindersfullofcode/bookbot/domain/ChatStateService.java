@@ -2,6 +2,7 @@ package com.bindersfullofcode.bookbot.domain;
 
 import com.bindersfullofcode.bookbot.bot.BookBotStates;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,36 +15,34 @@ public class ChatStateService {
     @Autowired
     ChatStateRepository chatStateRepository;
 
-    public void setStartChatState(long chatId) {
+    public ChatState getSavedOrDefaultChatState(long chatId) {
         Optional<ChatState> chatStateOptional = chatStateRepository.findByChatId(chatId);
-        ChatState chatState;
 
         if (chatStateOptional.isPresent()) {
-            chatState = chatStateOptional.get();
-            chatState.setState(BookBotStates.DEFAULT);
-            chatState.setStateArgs(new ArrayList<>());
+            return chatStateOptional.get();
         } else {
-            chatState = new ChatState(chatId, BookBotStates.DEFAULT);
+            return createDefaultChatState(chatId);
         }
+    }
+
+    public void setChatState(long chatId, int state, List<String> stateArgs) {
+        ChatState chatState = getSavedOrDefaultChatState(chatId);
+
+        chatState.setState(state);
+        chatState.setStateArgs(stateArgs);
+        chatState.setLastStateUpdate(LocalDateTime.now());
 
         chatStateRepository.save(chatState);
     }
 
-    public Optional<ChatState> getChatState(long chatId) {
-        return chatStateRepository.findByChatId(chatId);
+    private ChatState createDefaultChatState(long chatId) {
+        return createChatState(chatId, BookBotStates.DEFAULT, new ArrayList<>());
     }
 
-    public void setChatState(long chatId, int state, List<String> stateArgs) {
-        Optional<ChatState> chatStateOptional = chatStateRepository.findByChatId(chatId);
+    private ChatState createChatState(long chatId, int state, List<String> stateArgs) {
+        ChatState chatState = new ChatState(chatId, state, stateArgs);
+        chatStateRepository.save(chatState);
 
-        if (chatStateOptional.isPresent()) {
-            ChatState chatState = chatStateOptional.get();
-
-            chatState.setState(state);
-            chatState.setStateArgs(stateArgs);
-            chatState.setLastStateUpdate(LocalDateTime.now());
-
-            chatStateRepository.save(chatState);
-        }
+        return chatState;
     }
 }

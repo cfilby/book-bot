@@ -20,11 +20,11 @@ public class ChatState {
 
     }
 
-    public ChatState(long chatId, int state) {
+    public ChatState(long chatId, int state, List<String> stateArgs) {
         this.chatId = chatId;
         this.state = state;
         this.lastStateUpdate = LocalDateTime.now();
-        this.stateArgs = new ArrayList<>();
+        this.stateArgs = stateArgs;
     }
 
     @Id
