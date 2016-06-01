@@ -1,10 +1,9 @@
 package com.bindersfullofcode.bookbot.domain.chat;
 
-import com.bindersfullofcode.bookbot.bot.BookBotStates;
+import com.bindersfullofcode.bookbot.bot.BookBotState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,16 +23,16 @@ public class ChatStateService {
         }
     }
 
-    public void setChatState(long chatId, int state, List<String> stateArgs) {
+    public void setChatState(long chatId, BookBotState state, List<String> stateArgs) {
         ChatState chatState = new ChatState(chatId, state, stateArgs);
         chatStateRepository.save(chatState);
     }
 
     private ChatState createDefaultChatState(long chatId) {
-        return createChatState(chatId, BookBotStates.DEFAULT, new ArrayList<>());
+        return createChatState(chatId, BookBotState.DEFAULT, new ArrayList<>());
     }
 
-    private ChatState createChatState(long chatId, int state, List<String> stateArgs) {
+    private ChatState createChatState(long chatId, BookBotState state, List<String> stateArgs) {
         ChatState chatState = new ChatState(chatId, state, stateArgs);
         chatStateRepository.save(chatState);
 

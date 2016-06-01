@@ -51,7 +51,7 @@ public class BookBot extends TelegramLongPollingBot {
         ChatState chatState = chatStateService.getSavedOrDefaultChatState(message.getChatId());
 
         SendMessage sendMessage;
-        if (chatState.getState() != BookBotStates.DEFAULT) {
+        if (chatState.getState() != BookBotState.DEFAULT) {
             sendMessage = handleState(message, chatState);
         } else {
             sendMessage =  handleCommand(message, chatState);
@@ -70,37 +70,40 @@ public class BookBot extends TelegramLongPollingBot {
         SendMessage sendMessage = null;
 
         switch (chatState.getState()) {
-            case BookBotStates.NEW_BOOK:
-                sendMessage = handleNewBookState(message);
+            case DEFAULT:
                 break;
-            case BookBotStates.NEW_BOOK_NAME:
-                System.out.println("Book Title Set");
-            case BookBotStates.NEW_BOOK_DESCRIPTION:
-                break; // Skipping for now
-            case BookBotStates.NEW_BOOK_PAGE_COUNT:
 
-            case BookBotStates.ACTIVE_BOOK:
+            case BEGIN_BOOK:
+                sendMessage = handleBeginBookState(message);
+                break;
+            case BOOK_TITLE_SET:
+                sendMessage = handleBookTitleSetState(message, chatState);
+            case BOOK_DESCRIPTION_SET:
+            case BOOK_PAGE_COUNT_SET:
+            case BOOK_ACTIVE:
                 break;
         }
 
         return sendMessage;
     }
 
-    private SendMessage handleNewBookState(Message message) {
+    private SendMessage handleBeginBookState(Message message) {
         SendMessage sendMessage = createReplayMessage(message);
         sendMessage.setText("Great, you've started the book: " + message.getText() + ".\nNow enter the page count:");
         List<String> stateArgs = Arrays.asList(message.getText());
 
-        chatStateService.setChatState(message.getChatId(), BookBotStates.NEW_BOOK_NAME, stateArgs);
+        chatStateService.setChatState(message.getChatId(), BookBotState.BOOK_TITLE_SET, stateArgs);
 
         return sendMessage;
     }
 
-    private SendMessage handleNewBookPageCount(Message message, ChatState chatState) {
+    private SendMessage handleBookTitleSetState(Message message, ChatState chatState) {
         SendMessage sendMessage = createReplayMessage(message);
-        sendMessage.setText("");
+        sendMessage.setText("Hit!");
 
         int pageCount = Integer.parseInt(message.getText());
+        // process create BookGroup command.
+
 
         return sendMessage;
     }
@@ -135,7 +138,7 @@ public class BookBot extends TelegramLongPollingBot {
     private SendMessage handleStartBookCommand(Message message) {
         SendMessage sendMessage = createReplayMessage(message);
         sendMessage.setText("Great! To get started, first specify the name of the book your group is reading:");
-        chatStateService.setChatState(message.getChatId(), BookBotStates.NEW_BOOK, new ArrayList<>());
+        chatStateService.setChatState(message.getChatId(), BookBotState.BEGIN_BOOK, new ArrayList<>());
 
         return sendMessage;
     }

@@ -1,18 +1,15 @@
 package com.bindersfullofcode.bookbot.domain.chat;
 
-import org.telegram.telegrambots.api.objects.Chat;
+import com.bindersfullofcode.bookbot.bot.BookBotState;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 public class ChatState {
     private long chatId;
-    private int state;
+    private BookBotState state;
     private List<String> stateArgs;
     private LocalDateTime lastStateUpdate;
 
@@ -20,7 +17,7 @@ public class ChatState {
 
     }
 
-    public ChatState(long chatId, int state, List<String> stateArgs) {
+    public ChatState(long chatId, BookBotState state, List<String> stateArgs) {
         this.chatId = chatId;
         this.state = state;
         this.lastStateUpdate = LocalDateTime.now();
@@ -36,11 +33,12 @@ public class ChatState {
         this.chatId = chatId;
     }
 
-    public int getState() {
+    @Enumerated(EnumType.STRING)
+    public BookBotState getState() {
         return state;
     }
 
-    public void setState(int state) {
+    public void setState(BookBotState state) {
         this.state = state;
     }
 
