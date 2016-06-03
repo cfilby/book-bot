@@ -1,6 +1,7 @@
 package com.bindersfullofcode.bookbot.domain.chat;
 
 import com.bindersfullofcode.bookbot.bot.BookBotState;
+import org.hibernate.annotations.Fetch;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -42,7 +43,7 @@ public class ChatState {
         this.state = state;
     }
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     public List<String> getStateArgs() {
         return stateArgs;
     }

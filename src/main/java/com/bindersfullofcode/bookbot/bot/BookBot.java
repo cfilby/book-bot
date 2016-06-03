@@ -99,12 +99,13 @@ public class BookBot extends TelegramLongPollingBot {
 
     private SendMessage handleBookTitleSetState(Message message, ChatState chatState) {
         SendMessage sendMessage = createReplayMessage(message);
-        sendMessage.setText("Hit!");
+        sendMessage.setText("Book Started! Use the " + BookBotCommands.SET_PROGRESS_COMMAND + " to mark your current page number.");
 
         int pageCount = Integer.parseInt(message.getText());
-        // process create BookGroup command.
+        String bookTitle = chatState.getStateArgs().get(0);
 
-
+        bookGroupService.createBookGroup(message.getChatId(), bookTitle, null, pageCount);
+        chatStateService.setChatState(message.getChatId(), BookBotState.BOOK_ACTIVE, new ArrayList<>());
         return sendMessage;
     }
 
