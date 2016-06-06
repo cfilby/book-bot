@@ -1,9 +1,13 @@
 package com.bindersfullofcode.bookbot.domain.book;
 
 import javax.persistence.*;
+import javax.persistence.Entity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.hibernate.annotations.*;
+import org.hibernate.annotations.CascadeType;
 
 @Entity
 public class BookGroup {
@@ -83,7 +87,8 @@ public class BookGroup {
         this.pageCount = pageCount;
     }
 
-    @OneToMany
+    @OneToMany(fetch=FetchType.EAGER)
+    @Cascade(CascadeType.ALL)
     public List<BookGroupProgress> getBookGroupProgressList() {
         return bookGroupProgressList;
     }

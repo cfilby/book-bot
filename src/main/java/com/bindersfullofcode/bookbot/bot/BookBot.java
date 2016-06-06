@@ -1,5 +1,6 @@
 package com.bindersfullofcode.bookbot.bot;
 
+import com.bindersfullofcode.bookbot.domain.book.BookGroupProgress;
 import com.bindersfullofcode.bookbot.domain.book.BookGroupService;
 import com.bindersfullofcode.bookbot.domain.chat.ChatState;
 import com.bindersfullofcode.bookbot.domain.chat.ChatStateService;
@@ -51,10 +52,10 @@ public class BookBot extends TelegramLongPollingBot {
         ChatState chatState = chatStateService.getSavedOrDefaultChatState(message.getChatId());
 
         SendMessage sendMessage;
-        if (chatState.getState() != BookBotState.DEFAULT) {
-            sendMessage = handleState(message, chatState);
+        if (chatState.getState() == BookBotState.DEFAULT || chatState.getState() == BookBotState.BOOK_ACTIVE) {
+            sendMessage = handleCommands(message, chatState);
         } else {
-            sendMessage = handleCommand(message, chatState);
+            sendMessage = handleAddBook(message, chatState);
         }
 
         if (sendMessage != null) {
@@ -66,7 +67,7 @@ public class BookBot extends TelegramLongPollingBot {
         }
     }
 
-    public SendMessage handleState(Message message, ChatState chatState) {
+    public SendMessage handleAddBook(Message message, ChatState chatState) {
         SendMessage sendMessage = null;
 
         switch (chatState.getState()) {
@@ -100,7 +101,14 @@ public class BookBot extends TelegramLongPollingBot {
         SendMessage sendMessage = createReplayMessage(message);
         sendMessage.setText("Book Started! Use the " + BookBotCommands.SET_PROGRESS_COMMAND + " to mark your current page number.");
 
-        int pageCount = Integer.parseInt(message.getText());
+        int pageCount;
+        try {
+            pageCount = Integer.parseInt(message.getText());
+        } catch (NumberFormatException e) {
+            sendMessage.setText("Please provide a valid number!");
+            return sendMessage;
+        }
+
         String bookTitle = chatState.getStateArgs().get(0);
 
         bookGroupService.createBookGroup(message.getChatId(), bookTitle, null, pageCount);
@@ -109,55 +117,96 @@ public class BookBot extends TelegramLongPollingBot {
     }
 
 
-    private SendMessage handleCommand(Message message, ChatState chatState) {
+    private SendMessage handleCommands(Message message, ChatState chatState) {
         SendMessage sendMessage = null;
         String messageText = message.getText();
 
         if (messageText.startsWith(BookBotCommands.START_COMMAND)) {
-            sendMessage = handleStartCommand(message);
+            sendMessage = handleStartCommand(message, chatState);
         } else if (messageText.startsWith(BookBotCommands.START_BOOK_COMMAND)) {
-            sendMessage = handleStartBookCommand(message);
+            sendMessage = handleStartBookCommand(message, chatState);
         } else if (messageText.startsWith(BookBotCommands.SET_PROGRESS_COMMAND)) {
-            sendMessage = handleSetProgressCommand(message);
+            sendMessage = handleSetProgressCommand(message, chatState);
         } else if (messageText.startsWith(BookBotCommands.PROGRESS_COMMAND)) {
-            sendMessage = handleProgressCommand(message);
+            sendMessage = handleProgressCommand(message, chatState);
         } else if (messageText.startsWith(BookBotCommands.HELP_COMMAND)) {
-            sendMessage = handleHelpCommand(message);
+            sendMessage = handleHelpCommand(message, chatState);
         }
 
         return sendMessage;
     }
 
-    private SendMessage handleStartCommand(Message message) {
+    private SendMessage handleStartCommand(Message message, ChatState chatState) {
         SendMessage sendMessage = createReplayMessage(message);
         sendMessage.setText("To get started use the " + BookBotCommands.START_BOOK_COMMAND + " to specify the book your group is reading!");
 
         return sendMessage;
     }
 
-    private SendMessage handleStartBookCommand(Message message) {
+    private SendMessage handleStartBookCommand(Message message, ChatState chatState) {
         SendMessage sendMessage = createReplayMessage(message);
+
+        if (chatState.getState() == BookBotState.BOOK_ACTIVE) {
+            sendMessage.setText("Group already has an active book!");
+            return sendMessage;
+        }
+
         sendMessage.setText("Great! To get started, first specify the name of the book your group is reading:");
         chatStateService.setChatState(message.getChatId(), BookBotState.BEGIN_BOOK, new ArrayList<>());
 
         return sendMessage;
     }
 
-    private SendMessage handleSetProgressCommand(Message message) {
+    private SendMessage handleSetProgressCommand(Message message, ChatState chatState) {
         SendMessage sendMessage = createReplayMessage(message);
-        sendMessage.setText("Setting Progress!");
+
+        if (chatState.getState() != BookBotState.BOOK_ACTIVE) {
+            sendMessage.setText("Chat must have an active book first!");
+            return sendMessage;
+        }
+
+        int pageNumber;
+        try {
+            String[] messageParts = message.getText().split("\\s+");
+            pageNumber = Integer.parseInt(messageParts[1]);
+        } catch (IndexOutOfBoundsException e) {
+            sendMessage.setText("Command should be in the format of /setprogress pageNumber");
+            return sendMessage;
+        } catch (NumberFormatException e) {
+            sendMessage.setText("Please provide a valid number!");
+            return sendMessage;
+        }
+
+        sendMessage.setText(message.getFrom().getUserName() + " at page " + pageNumber);
+        bookGroupService.addBookGroupProgress(message.getChatId(), message.getFrom().getId(),
+                message.getFrom().getUserName(), pageNumber);
 
         return sendMessage;
     }
 
-    private SendMessage handleProgressCommand(Message message) {
+    private SendMessage handleProgressCommand(Message message, ChatState chatState) {
         SendMessage sendMessage = createReplayMessage(message);
-        sendMessage.setText("Handling Progress!");
+
+        if (chatState.getState() != BookBotState.BOOK_ACTIVE) {
+            sendMessage.setText("Chat must have an active book first!");
+            return sendMessage;
+        }
+
+        List<BookGroupProgress> progressEntries;
+        progressEntries = bookGroupService.getBookGroupProgress(message.getChatId());
+
+        String responseMessage = "";
+        for (BookGroupProgress entry : progressEntries) {
+            responseMessage += entry.toString() + "\n";
+        }
+        responseMessage += "Total Entries: " + progressEntries.size();
+
+        sendMessage.setText(responseMessage);
 
         return sendMessage;
     }
 
-    private SendMessage handleHelpCommand(Message message) {
+    private SendMessage handleHelpCommand(Message message, ChatState chatState) {
         SendMessage sendMessage = createReplayMessage(message);
         sendMessage.setText("To get started, create a new book!");
 

@@ -11,6 +11,8 @@ import java.util.Optional;
 public class BookGroupService {
     @Autowired
     private BookGroupRepository bookGroupRepository;
+    @Autowired
+    private BookGroupProgressRepository bookGroupProgressRepository;
 
     public void createBookGroup(long chatId, String name, String description, int pageCount) {
         Optional<BookGroup> bookGroupOptional = bookGroupRepository.findByChatId(chatId);
@@ -43,9 +45,7 @@ public class BookGroupService {
         Optional<BookGroup> bookGroupOptional = bookGroupRepository.findByChatId(chatId);
 
         if (bookGroupOptional.isPresent()) {
-            BookGroup bookGroup = bookGroupOptional.get();
-
-            return bookGroup.getBookGroupProgressList();
+            return bookGroupOptional.get().getBookGroupProgressList();
         }
 
         return new ArrayList<BookGroupProgress>();

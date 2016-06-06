@@ -3,6 +3,7 @@ package com.bindersfullofcode.bookbot.domain.book;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 public class BookGroupProgress {
@@ -23,6 +24,7 @@ public class BookGroupProgress {
         this.userId = userId;
         this.username = username;
         this.pageNumber = pageNumber;
+        this.timestamp = LocalDateTime.now();
     }
 
     @ManyToOne
@@ -74,5 +76,11 @@ public class BookGroupProgress {
 
     public void setPageNumber(int pageNumber) {
         this.pageNumber = pageNumber;
+    }
+
+    @Override
+    public String toString() {
+        return username + " reached page " + pageNumber + " at "
+                + timestamp.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)  + ".";
     }
 }
