@@ -12,6 +12,7 @@ import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
+import org.telegram.telegrambots.api.objects.replykeyboard.ForceReplyKeyboard;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
 import java.util.ArrayList;
@@ -213,10 +214,22 @@ public class BookBot extends TelegramLongPollingBot {
         return sendMessage;
     }
 
+    private SendMessage createForceReplyReplayMessage(Message message) {
+        SendMessage sendMessage = createReplayMessage(message);
+
+        ForceReplyKeyboard forceReplyKeyboard = new ForceReplyKeyboard();
+        forceReplyKeyboard.setSelective(false);
+        forceReplyKeyboard.setForceReply(true);
+        sendMessage.setReplayMarkup(forceReplyKeyboard);
+
+        return sendMessage;
+    }
+
     private SendMessage createReplayMessage(Message message) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(message.getChatId().toString());
         sendMessage.enableMarkdown(true);
+
         sendMessage.setReplayToMessageId(message.getMessageId());
 
         return sendMessage;
