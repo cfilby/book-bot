@@ -1,7 +1,5 @@
 package com.bindersfullofcode.bookbot.bot;
 
-import com.bindersfullofcode.bookbot.config.BotConfig;
-
 import com.bindersfullofcode.bookbot.domain.book.BookGroupService;
 import com.bindersfullofcode.bookbot.domain.chat.ChatState;
 import com.bindersfullofcode.bookbot.domain.chat.ChatStateService;
@@ -25,18 +23,20 @@ public class BookBot extends TelegramLongPollingBot {
     private static final Logger logger = LoggerFactory.getLogger(BookBot.class);
 
     @Autowired
+    private BookBotConfig bookBotConfig;
+    @Autowired
     private ChatStateService chatStateService;
     @Autowired
     private BookGroupService bookGroupService;
 
     @Override
     public String getBotUsername() {
-        return BotConfig.BOT_NAME;
+        return bookBotConfig.getName();
     }
 
     @Override
     public String getBotToken() {
-        return BotConfig.BOT_TOKEN;
+        return bookBotConfig.getToken();
     }
 
     @Override
@@ -54,7 +54,7 @@ public class BookBot extends TelegramLongPollingBot {
         if (chatState.getState() != BookBotState.DEFAULT) {
             sendMessage = handleState(message, chatState);
         } else {
-            sendMessage =  handleCommand(message, chatState);
+            sendMessage = handleCommand(message, chatState);
         }
 
         if (sendMessage != null) {
@@ -72,7 +72,6 @@ public class BookBot extends TelegramLongPollingBot {
         switch (chatState.getState()) {
             case DEFAULT:
                 break;
-
             case BEGIN_BOOK:
                 sendMessage = handleBeginBookState(message);
                 break;
