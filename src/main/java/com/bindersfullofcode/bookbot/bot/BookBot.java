@@ -89,7 +89,7 @@ public class BookBot extends TelegramLongPollingBot {
     }
 
     private SendMessage handleBeginBookState(Message message) {
-        SendMessage sendMessage = createReplayMessage(message);
+        SendMessage sendMessage = createForceReplyReplayMessage(message);
         sendMessage.setText("Great, you've started the book: " + message.getText() + ".\nNow enter the page count:");
         List<String> stateArgs = Arrays.asList(message.getText());
 
@@ -145,7 +145,7 @@ public class BookBot extends TelegramLongPollingBot {
     }
 
     private SendMessage handleStartBookCommand(Message message, ChatState chatState) {
-        SendMessage sendMessage = createReplayMessage(message);
+        SendMessage sendMessage = createForceReplyReplayMessage(message);
 
         if (chatState.getState() == BookBotState.BOOK_ACTIVE) {
             sendMessage.setText("Group already has an active book!");
