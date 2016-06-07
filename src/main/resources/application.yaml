@@ -1,6 +1,8 @@
 spring:
   application:
     name: BookClubBot
+  profiles:
+    active: development
 
 bot:
   name: BookClubBot
