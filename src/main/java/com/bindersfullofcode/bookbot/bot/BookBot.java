@@ -200,6 +200,7 @@ public class BookBot extends TelegramLongPollingBot {
         Set<BookGroupUserState> userStates;
         userStates = bookGroupService.getBookGroupUserStates(message.getChatId());
 
+
         String responseMessage = "";
         for (BookGroupUserState userState : userStates) {
             responseMessage += userState.toString() + "\n";

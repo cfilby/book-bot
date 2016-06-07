@@ -1,11 +1,15 @@
 package com.bindersfullofcode.bookbot.domain.book;
 
+import org.ocpsoft.prettytime.PrettyTime;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 @Entity
 public class BookGroupUserState {
@@ -90,8 +94,13 @@ public class BookGroupUserState {
 
     @Override
     public String toString() {
+        PrettyTime prettyTime = new PrettyTime();
+        Date timestampDate = Date.from(timestamp.atZone(ZoneId.systemDefault()).toInstant());
+        String prettyInterval = prettyTime.format(timestampDate);
+
         String userIdentifier = (firstName.length() > 0) ? firstName : username;
-        return userIdentifier + " is at page " + currentPage + " as of " + timestamp.format(DateTimeFormatter.ISO_DATE_TIME) + ".";
+
+        return userIdentifier + " is at page " + currentPage + " as of " + prettyInterval + ".";
     }
 
     // FIXME: This is extremely rudimentary and bad - Longer term goal is to make this a bit more robust. For now, the primary key for a UserState is the page number.
