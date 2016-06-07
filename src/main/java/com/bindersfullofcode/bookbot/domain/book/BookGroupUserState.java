@@ -1,0 +1,112 @@
+package com.bindersfullofcode.bookbot.domain.book;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+@Entity
+public class BookGroupUserState {
+    private long id;
+    private long userId;
+    private String username;
+    private String firstName;
+    private String lastName;
+    private int currentPage;
+    private LocalDateTime timestamp;
+
+    public BookGroupUserState() {
+
+    }
+
+    public BookGroupUserState(long userId, String username, String firstName, String lastName, int currentPage) {
+        this.userId = userId;
+        this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.currentPage = currentPage;
+        this.timestamp = LocalDateTime.now();
+    }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    public long getId() {
+            return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    public void setCurrentPage(int currentPage) {
+        this.currentPage = currentPage;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    @Override
+    public String toString() {
+        String userIdentifier = (firstName.length() > 0) ? firstName : username;
+        return userIdentifier + " is at page " + currentPage + " as of " + timestamp.format(DateTimeFormatter.ISO_DATE_TIME) + ".";
+    }
+
+    // FIXME: This is extremely rudimentary and bad - Longer term goal is to make this a bit more robust. For now, the primary key for a UserState is the page number.
+
+    @Override
+    public boolean equals(Object object) {
+        if (!(object instanceof BookGroupUserState)) {
+            return false;
+        }
+
+        return ((BookGroupUserState) object).getUserId() == this.userId;
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) userId;
+    }
+}

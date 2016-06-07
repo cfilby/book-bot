@@ -1,6 +1,8 @@
-package com.bindersfullofcode.bookbot.domain.chat;
+package com.bindersfullofcode.bookbot.service;
 
 import com.bindersfullofcode.bookbot.bot.BookBotState;
+import com.bindersfullofcode.bookbot.domain.chat.ChatState;
+import com.bindersfullofcode.bookbot.repository.ChatStateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

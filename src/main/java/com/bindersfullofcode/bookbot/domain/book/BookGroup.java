@@ -4,7 +4,9 @@ import javax.persistence.*;
 import javax.persistence.Entity;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.CascadeType;
@@ -18,7 +20,7 @@ public class BookGroup {
     private String name;
     private String description;
     private int pageCount;
-    private List<BookGroupProgress> bookGroupProgressList;
+    private Set<BookGroupUserState> bookGroupUserStates;
 
     public BookGroup() {
 
@@ -34,7 +36,7 @@ public class BookGroup {
         this.description = description;
         this.pageCount = pageCount;
         this.createDateTime = LocalDateTime.now();
-        this.bookGroupProgressList = new ArrayList<>();
+        this.bookGroupUserStates = new HashSet<>();
     }
 
     @Id
@@ -89,16 +91,18 @@ public class BookGroup {
 
     @OneToMany(fetch=FetchType.EAGER)
     @Cascade(CascadeType.ALL)
-    public List<BookGroupProgress> getBookGroupProgressList() {
-        return bookGroupProgressList;
+    public Set<BookGroupUserState> getBookGroupUserStates() {
+        return bookGroupUserStates;
     }
 
-    public void setBookGroupProgressList(List<BookGroupProgress> bookGroupProgressList) {
-        this.bookGroupProgressList = bookGroupProgressList;
+    public void setBookGroupUserStates(Set<BookGroupUserState> bookGroupUserStates) {
+        this.bookGroupUserStates = bookGroupUserStates;
     }
 
     @Transient
-    public void addBookGroupProgress(BookGroupProgress bookGroupProgress) {
-        this.bookGroupProgressList.add(bookGroupProgress);
+    public void addBookGroupUserState(BookGroupUserState bookGroupUserState) {
+        // TODO: Fix this. Shouldn't have to remove old state before adding new one?
+        this.bookGroupUserStates.remove(bookGroupUserState);
+        this.bookGroupUserStates.add(bookGroupUserState);
     }
 }

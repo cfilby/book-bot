@@ -1,18 +1,17 @@
-package com.bindersfullofcode.bookbot.domain.book;
+package com.bindersfullofcode.bookbot.service;
 
+import com.bindersfullofcode.bookbot.domain.book.BookGroup;
+import com.bindersfullofcode.bookbot.domain.book.BookGroupUserState;
+import com.bindersfullofcode.bookbot.repository.BookGroupRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class BookGroupService {
     @Autowired
     private BookGroupRepository bookGroupRepository;
-    @Autowired
-    private BookGroupProgressRepository bookGroupProgressRepository;
 
     public void createBookGroup(long chatId, String name, String description, int pageCount) {
         Optional<BookGroup> bookGroupOptional = bookGroupRepository.findByChatId(chatId);
@@ -28,26 +27,26 @@ public class BookGroupService {
         return bookGroupRepository.findByChatId(chatId);
     }
 
-    public void addBookGroupProgress(long chatId, long userId, String username, int pageNumber) {
+    public void addBookGroupUserState(long chatId, long userId, String username, String firstName, String lastName, int currentPageNumber) {
         Optional<BookGroup> bookGroupOptional = bookGroupRepository.findByChatId(chatId);
 
         if (bookGroupOptional.isPresent()) {
             BookGroup bookGroup = bookGroupOptional.get();
 
-            BookGroupProgress bookGroupProgress = new BookGroupProgress(bookGroup, userId, username, pageNumber);
-            bookGroup.addBookGroupProgress(bookGroupProgress);
+            BookGroupUserState bookGroupUserState = new BookGroupUserState(userId, username, firstName, lastName, currentPageNumber);
+            bookGroup.addBookGroupUserState(bookGroupUserState);
 
             bookGroupRepository.save(bookGroup);
         }
     }
 
-    public List<BookGroupProgress> getBookGroupProgress(long chatId) {
+    public Set<BookGroupUserState> getBookGroupUserStates(long chatId) {
         Optional<BookGroup> bookGroupOptional = bookGroupRepository.findByChatId(chatId);
 
         if (bookGroupOptional.isPresent()) {
-            return bookGroupOptional.get().getBookGroupProgressList();
+            return bookGroupOptional.get().getBookGroupUserStates();
         }
 
-        return new ArrayList<BookGroupProgress>();
+        return new HashSet<BookGroupUserState>();
     }
 }

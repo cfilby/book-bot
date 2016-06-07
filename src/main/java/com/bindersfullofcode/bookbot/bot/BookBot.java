@@ -1,9 +1,9 @@
 package com.bindersfullofcode.bookbot.bot;
 
-import com.bindersfullofcode.bookbot.domain.book.BookGroupProgress;
-import com.bindersfullofcode.bookbot.domain.book.BookGroupService;
+import com.bindersfullofcode.bookbot.service.BookGroupService;
+import com.bindersfullofcode.bookbot.domain.book.BookGroupUserState;
 import com.bindersfullofcode.bookbot.domain.chat.ChatState;
-import com.bindersfullofcode.bookbot.domain.chat.ChatStateService;
+import com.bindersfullofcode.bookbot.service.ChatStateService;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +12,14 @@ import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
+import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.api.objects.replykeyboard.ForceReplyKeyboard;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class BookBot extends TelegramLongPollingBot {
@@ -100,7 +102,7 @@ public class BookBot extends TelegramLongPollingBot {
 
     private SendMessage handleBookTitleSetState(Message message, ChatState chatState) {
         SendMessage sendMessage = createReplayMessage(message);
-        sendMessage.setText("Book Started! Use the " + BookBotCommands.SET_PROGRESS_COMMAND + " to mark your current page number.");
+        sendMessage.setText("Book Started! Use the " + BookBotCommands.SET_CURRENT_PAGE + " to mark your current page number.");
 
         int pageCount;
         try {
@@ -126,8 +128,8 @@ public class BookBot extends TelegramLongPollingBot {
             sendMessage = handleStartCommand(message, chatState);
         } else if (messageText.startsWith(BookBotCommands.START_BOOK_COMMAND)) {
             sendMessage = handleStartBookCommand(message, chatState);
-        } else if (messageText.startsWith(BookBotCommands.SET_PROGRESS_COMMAND)) {
-            sendMessage = handleSetProgressCommand(message, chatState);
+        } else if (messageText.startsWith(BookBotCommands.SET_CURRENT_PAGE)) {
+            sendMessage = handleSetCurrentPageCommand(message, chatState);
         } else if (messageText.startsWith(BookBotCommands.PROGRESS_COMMAND)) {
             sendMessage = handleProgressCommand(message, chatState);
         } else if (messageText.startsWith(BookBotCommands.HELP_COMMAND)) {
@@ -158,7 +160,7 @@ public class BookBot extends TelegramLongPollingBot {
         return sendMessage;
     }
 
-    private SendMessage handleSetProgressCommand(Message message, ChatState chatState) {
+    private SendMessage handleSetCurrentPageCommand(Message message, ChatState chatState) {
         SendMessage sendMessage = createReplayMessage(message);
 
         if (chatState.getState() != BookBotState.BOOK_ACTIVE) {
@@ -166,21 +168,23 @@ public class BookBot extends TelegramLongPollingBot {
             return sendMessage;
         }
 
-        int pageNumber;
+        int currentPageNumber;
         try {
             String[] messageParts = message.getText().split("\\s+");
-            pageNumber = Integer.parseInt(messageParts[1]);
+            currentPageNumber = Integer.parseInt(messageParts[1]);
         } catch (IndexOutOfBoundsException e) {
-            sendMessage.setText("Command should be in the format of /setprogress pageNumber");
+            sendMessage.setText("Command should be in the format of" + BookBotCommands.SET_CURRENT_PAGE + " pageNumber");
             return sendMessage;
         } catch (NumberFormatException e) {
             sendMessage.setText("Please provide a valid number!");
             return sendMessage;
         }
 
-        sendMessage.setText(message.getFrom().getUserName() + " at page " + pageNumber);
-        bookGroupService.addBookGroupProgress(message.getChatId(), message.getFrom().getId(),
-                message.getFrom().getUserName(), pageNumber);
+        User sender = message.getFrom();
+        String userIdentifier = (sender.getFirstName().length() > 0) ? sender.getFirstName() : sender.getUserName();
+        sendMessage.setText(userIdentifier + " is at page " + currentPageNumber + ".");
+        bookGroupService.addBookGroupUserState(message.getChatId(), sender.getId(),
+                sender.getUserName(), sender.getFirstName(), sender.getLastName(), currentPageNumber);
 
         return sendMessage;
     }
@@ -193,14 +197,14 @@ public class BookBot extends TelegramLongPollingBot {
             return sendMessage;
         }
 
-        List<BookGroupProgress> progressEntries;
-        progressEntries = bookGroupService.getBookGroupProgress(message.getChatId());
+        Set<BookGroupUserState> userStates;
+        userStates = bookGroupService.getBookGroupUserStates(message.getChatId());
 
         String responseMessage = "";
-        for (BookGroupProgress entry : progressEntries) {
-            responseMessage += entry.toString() + "\n";
+        for (BookGroupUserState userState : userStates) {
+            responseMessage += userState.toString() + "\n";
         }
-        responseMessage += "Total Entries: " + progressEntries.size();
+        responseMessage += "Total Participants: " + userStates.size();
 
         sendMessage.setText(responseMessage);
 
