@@ -45,7 +45,6 @@ public class BookBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        logger.info(update.toString());
         if (update.hasMessage() && update.getMessage().hasText()) {
             handleIncomingMessage(update.getMessage());
         }
