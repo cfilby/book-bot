@@ -1,5 +1,6 @@
 package com.bindersfullofcode.bookbot.bot;
 
+import com.bindersfullofcode.bookbot.domain.book.BookGroup;
 import com.bindersfullofcode.bookbot.service.BookGroupService;
 import com.bindersfullofcode.bookbot.domain.book.BookGroupUserState;
 import com.bindersfullofcode.bookbot.domain.chat.ChatState;
@@ -16,10 +17,7 @@ import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.api.objects.replykeyboard.ForceReplyKeyboard;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class BookBot extends TelegramLongPollingBot {
@@ -53,16 +51,16 @@ public class BookBot extends TelegramLongPollingBot {
     public void handleIncomingMessage(Message message) {
         ChatState chatState = chatStateService.getSavedOrDefaultChatState(message.getChatId());
 
-        SendMessage sendMessage;
+        SendMessage responseSendMessage;
         if (chatState.getState() == BookBotState.DEFAULT || chatState.getState() == BookBotState.BOOK_ACTIVE) {
-            sendMessage = handleCommands(message, chatState);
+            responseSendMessage = handleCommands(message, chatState);
         } else {
-            sendMessage = handleAddBook(message, chatState);
+            responseSendMessage = handleAddBook(message, chatState);
         }
 
-        if (sendMessage != null) {
+        if (responseSendMessage != null) {
             try {
-                sendMessage(sendMessage);
+                sendMessage(responseSendMessage);
             } catch (TelegramApiException e) {
                 e.printStackTrace();
             }
@@ -129,8 +127,10 @@ public class BookBot extends TelegramLongPollingBot {
             sendMessage = handleStartBookCommand(message, chatState);
         } else if (messageText.startsWith(BookBotCommands.SET_CURRENT_PAGE)) {
             sendMessage = handleSetCurrentPageCommand(message, chatState);
-        } else if (messageText.startsWith(BookBotCommands.PROGRESS_COMMAND)) {
-            sendMessage = handleProgressCommand(message, chatState);
+        } else if (messageText.startsWith(BookBotCommands.GROUP_PROGRESS_COMMAND)) {
+            sendMessage = handleGroupProgressCommand(message, chatState);
+        } else if (messageText.startsWith(BookBotCommands.MY_PROGRESS_COMMAND)) {
+            sendMessage = handleMyProgressCommand(message, chatState);
         } else if (messageText.startsWith(BookBotCommands.HELP_COMMAND)) {
             sendMessage = handleHelpCommand(message, chatState);
         }
@@ -179,6 +179,11 @@ public class BookBot extends TelegramLongPollingBot {
             return sendMessage;
         }
 
+        if (currentPageNumber < 0) {
+            sendMessage.setText("Current page number must be positive value!");
+            return sendMessage;
+        }
+
         User sender = message.getFrom();
         String userIdentifier = (sender.getFirstName().length() > 0) ? sender.getFirstName() : sender.getUserName();
         sendMessage.setText(userIdentifier + " is at page " + currentPageNumber + ".");
@@ -188,7 +193,35 @@ public class BookBot extends TelegramLongPollingBot {
         return sendMessage;
     }
 
-    private SendMessage handleProgressCommand(Message message, ChatState chatState) {
+    private SendMessage handleMyProgressCommand(Message message, ChatState chatState) {
+        SendMessage sendMessage = createReplayMessage(message);
+
+        if (chatState.getState() != BookBotState.BOOK_ACTIVE) {
+            sendMessage.setText("Chat must have an active book first!");
+            return sendMessage;
+        }
+
+        BookGroup bookGroup = bookGroupService.getChatBookGroup(message.getChatId()).get();
+        Optional<BookGroupUserState> bookGroupUserStateOptional = bookGroup.getBookGroupUserState(message.getFrom().getId());
+
+        if (bookGroupUserStateOptional.isPresent()) {
+            BookGroupUserState bookGroupUserState = bookGroupUserStateOptional.get();
+            int percentDone = (int) Math.round(
+                    Math.min(100, ((double) bookGroupUserState.getCurrentPage() / bookGroup.getPageCount()) * 100)
+            );
+
+
+            sendMessage.setText("You are on page " + bookGroupUserState.getCurrentPage() +
+                    " as of " + bookGroupUserState.getPrettyInterval() + ".\n" +
+                    "You are approximately " + percentDone + "% way through the book.");
+        } else {
+            sendMessage.setText("You have not logged any progress in the active book.");
+        }
+
+        return sendMessage;
+    }
+
+    private SendMessage handleGroupProgressCommand(Message message, ChatState chatState) {
         SendMessage sendMessage = createReplayMessage(message);
 
         if (chatState.getState() != BookBotState.BOOK_ACTIVE) {

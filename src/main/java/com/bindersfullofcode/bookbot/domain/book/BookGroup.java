@@ -3,10 +3,7 @@ package com.bindersfullofcode.bookbot.domain.book;
 import javax.persistence.*;
 import javax.persistence.Entity;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.hibernate.annotations.*;
 import org.hibernate.annotations.CascadeType;
@@ -97,6 +94,17 @@ public class BookGroup {
 
     public void setBookGroupUserStates(Set<BookGroupUserState> bookGroupUserStates) {
         this.bookGroupUserStates = bookGroupUserStates;
+    }
+
+    @Transient
+    public Optional<BookGroupUserState> getBookGroupUserState(long userId) {
+        for (BookGroupUserState bookGroupUserState : bookGroupUserStates) {
+            if (bookGroupUserState.getUserId() == userId) {
+                return Optional.of(bookGroupUserState);
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Transient

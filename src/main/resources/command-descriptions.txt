@@ -1,0 +1,8 @@
+start - Start the bot
+beginbook - Start tracking a book in the current chat
+endbook - End tracking a book in the current chat
+help - Display help information
+groupprogress - Display the current page numbers of chat members who are participating
+myprogress - Display your current progress in greater detail.
+setcurrentpage - Set your current page number in the active book
+cancel - Cancel the current operation

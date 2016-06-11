@@ -2,10 +2,7 @@ package com.bindersfullofcode.bookbot.domain.book;
 
 import org.ocpsoft.prettytime.PrettyTime;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -92,11 +89,17 @@ public class BookGroupUserState {
         this.timestamp = timestamp;
     }
 
-    @Override
-    public String toString() {
+    @Transient
+    public String getPrettyInterval() {
         PrettyTime prettyTime = new PrettyTime();
         Date timestampDate = Date.from(timestamp.atZone(ZoneId.systemDefault()).toInstant());
-        String prettyInterval = prettyTime.format(timestampDate);
+
+        return prettyTime.format(timestampDate);
+    }
+
+    @Override
+    public String toString() {
+        String prettyInterval = getPrettyInterval();
 
         String userIdentifier = (firstName.length() > 0) ? firstName : username;
 
