@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.TelegramApiException;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
@@ -256,8 +256,8 @@ public class BookBot extends TelegramLongPollingBot {
 
         ForceReplyKeyboard forceReplyKeyboard = new ForceReplyKeyboard();
         forceReplyKeyboard.setSelective(false);
-        forceReplyKeyboard.setForceReply(true);
-        sendMessage.setReplayMarkup(forceReplyKeyboard);
+        //forceReplyKeyboard.setForceReply(true);
+        sendMessage.setReplyMarkup(forceReplyKeyboard);
 
         return sendMessage;
     }
@@ -267,7 +267,7 @@ public class BookBot extends TelegramLongPollingBot {
         sendMessage.setChatId(message.getChatId().toString());
         sendMessage.enableMarkdown(true);
 
-        sendMessage.setReplayToMessageId(message.getMessageId());
+        sendMessage.setReplyToMessageId(message.getMessageId());
 
         return sendMessage;
     }

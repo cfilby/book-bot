@@ -7,13 +7,19 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.telegram.telegrambots.TelegramApiException;
+
+import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.TelegramBotsApi;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 @SpringBootApplication
 public class BookbotApplication {
 
 	private static final Logger logger = LoggerFactory.getLogger(BookbotApplication.class);
+
+	static {
+        ApiContextInitializer.init();
+    }
 
 	@Bean
 	public CommandLineRunner bookBotRunner(BookBot bookBot) {
