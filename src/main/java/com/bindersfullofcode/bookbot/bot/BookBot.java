@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.api.methods.groupadministration.GetChatAdministrators;
+import org.telegram.telegrambots.api.objects.ChatMember;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
@@ -88,7 +90,7 @@ public class BookBot extends TelegramLongPollingBot {
     }
 
     private SendMessage handleBeginBookState(Message message) {
-        SendMessage sendMessage = createForceReplyReplayMessage(message);
+        SendMessage sendMessage = createForceReplyMessage(message);
         sendMessage.setText("Great, you've started the book: " + message.getText() + ".\nNow enter the page count:");
         List<String> stateArgs = Arrays.asList(message.getText());
 
@@ -98,7 +100,7 @@ public class BookBot extends TelegramLongPollingBot {
     }
 
     private SendMessage handleBookTitleSetState(Message message, ChatState chatState) {
-        SendMessage sendMessage = createReplayMessage(message);
+        SendMessage sendMessage = createReplyMessage(message);
         sendMessage.setText("Book Started! Use the " + BookBotCommands.SET_CURRENT_PAGE + " to mark your current page number.");
 
         int pageCount;
@@ -133,20 +135,22 @@ public class BookBot extends TelegramLongPollingBot {
             sendMessage = handleMyProgressCommand(message, chatState);
         } else if (messageText.startsWith(BookBotCommands.HELP_COMMAND)) {
             sendMessage = handleHelpCommand(message, chatState);
+        } else if (messageText.startsWith(BookBotCommands.END_BOOK_COMMAND)) {
+            sendMessage = handleEndBookCommand(message, chatState);
         }
 
         return sendMessage;
     }
 
     private SendMessage handleStartCommand(Message message, ChatState chatState) {
-        SendMessage sendMessage = createReplayMessage(message);
+        SendMessage sendMessage = createReplyMessage(message);
         sendMessage.setText("To get started use the " + BookBotCommands.START_BOOK_COMMAND + " to specify the book your group is reading!");
 
         return sendMessage;
     }
 
     private SendMessage handleStartBookCommand(Message message, ChatState chatState) {
-        SendMessage sendMessage = createForceReplyReplayMessage(message);
+        SendMessage sendMessage = createForceReplyMessage(message);
 
         if (chatState.getState() == BookBotState.BOOK_ACTIVE) {
             sendMessage.setText("Group already has an active book!");
@@ -160,7 +164,7 @@ public class BookBot extends TelegramLongPollingBot {
     }
 
     private SendMessage handleSetCurrentPageCommand(Message message, ChatState chatState) {
-        SendMessage sendMessage = createReplayMessage(message);
+        SendMessage sendMessage = createReplyMessage(message);
 
         if (chatState.getState() != BookBotState.BOOK_ACTIVE) {
             sendMessage.setText("Chat must have an active book first!");
@@ -194,7 +198,7 @@ public class BookBot extends TelegramLongPollingBot {
     }
 
     private SendMessage handleMyProgressCommand(Message message, ChatState chatState) {
-        SendMessage sendMessage = createReplayMessage(message);
+        SendMessage sendMessage = createReplyMessage(message);
 
         if (chatState.getState() != BookBotState.BOOK_ACTIVE) {
             sendMessage.setText("Chat must have an active book first!");
@@ -222,7 +226,7 @@ public class BookBot extends TelegramLongPollingBot {
     }
 
     private SendMessage handleGroupProgressCommand(Message message, ChatState chatState) {
-        SendMessage sendMessage = createReplayMessage(message);
+        SendMessage sendMessage = createReplyMessage(message);
 
         if (chatState.getState() != BookBotState.BOOK_ACTIVE) {
             sendMessage.setText("Chat must have an active book first!");
@@ -244,25 +248,68 @@ public class BookBot extends TelegramLongPollingBot {
         return sendMessage;
     }
 
+    private SendMessage handleEndBookCommand(Message message, ChatState chatState) {
+        SendMessage sendMessage = createReplyMessage(message);
+
+        if (chatState.getState() != BookBotState.BOOK_ACTIVE) {
+            sendMessage.setText("You must start a book before ending it!");
+            return sendMessage;
+        }
+
+        GetChatAdministrators getChatAdministrators = new GetChatAdministrators();
+        getChatAdministrators.setChatId(message.getChatId());
+
+
+        if (!message.getChat().getAllMembersAreAdministrators()
+                && message.isGroupMessage() || message.isSuperGroupMessage()) {
+            List<ChatMember> chatMembers;
+            try {
+                chatMembers = getChatAdministrators(getChatAdministrators);
+            } catch (TelegramApiException e) {
+                e.printStackTrace();
+
+                sendMessage.setText("Unable to get chat administrators!");
+                return sendMessage;
+            }
+
+            boolean isAdmin = false;
+            for (int i = 0; i < chatMembers.size(); i++) {
+                if (chatMembers.get(i).getUser().getId() == message.getFrom().getId()) {
+                    isAdmin = true;
+                    break;
+                }
+            }
+
+            if (!isAdmin) {
+                sendMessage.setText("You must be an admin to end the book!");
+                return sendMessage;
+            }
+        }
+
+        bookGroupService.endBook(message.getChatId());
+        sendMessage.setText("Book ended!\n");
+
+        return sendMessage;
+    }
+
     private SendMessage handleHelpCommand(Message message, ChatState chatState) {
-        SendMessage sendMessage = createReplayMessage(message);
+        SendMessage sendMessage = createReplyMessage(message);
         sendMessage.setText("To get started, create a new book!");
 
         return sendMessage;
     }
 
-    private SendMessage createForceReplyReplayMessage(Message message) {
-        SendMessage sendMessage = createReplayMessage(message);
+    private SendMessage createForceReplyMessage(Message message) {
+        SendMessage sendMessage = createReplyMessage(message);
 
         ForceReplyKeyboard forceReplyKeyboard = new ForceReplyKeyboard();
         forceReplyKeyboard.setSelective(false);
-        //forceReplyKeyboard.setForceReply(true);
         sendMessage.setReplyMarkup(forceReplyKeyboard);
 
         return sendMessage;
     }
 
-    private SendMessage createReplayMessage(Message message) {
+    private SendMessage createReplyMessage(Message message) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(message.getChatId().toString());
         sendMessage.enableMarkdown(true);

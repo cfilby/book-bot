@@ -11,5 +11,6 @@ public class BookBotCommands {
     public static final String SET_CURRENT_PAGE = COMMAND_PREFIX_CHAR + "setcurrentpage";
     public static final String MY_PROGRESS_COMMAND = COMMAND_PREFIX_CHAR + "myprogress";
     public static final String GROUP_PROGRESS_COMMAND = COMMAND_PREFIX_CHAR + "groupprogress";
+    public static final String END_BOOK_COMMAND = COMMAND_PREFIX_CHAR + "endbook";
     public static final String HELP_COMMAND = COMMAND_PREFIX_CHAR + "help";
 }

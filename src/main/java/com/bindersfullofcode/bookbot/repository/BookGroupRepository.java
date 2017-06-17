@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface BookGroupRepository extends CrudRepository<BookGroup, Long> {
 
     public Optional<BookGroup> findByChatId(long chatId);
+    
+    public void deleteByChatId(long chatId);
 }
