@@ -256,36 +256,6 @@ public class BookBot extends TelegramLongPollingBot {
             return sendMessage;
         }
 
-        GetChatAdministrators getChatAdministrators = new GetChatAdministrators();
-        getChatAdministrators.setChatId(message.getChatId());
-
-
-        if (!message.getChat().getAllMembersAreAdministrators()
-                && message.isGroupMessage() || message.isSuperGroupMessage()) {
-            List<ChatMember> chatMembers;
-            try {
-                chatMembers = getChatAdministrators(getChatAdministrators);
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-
-                sendMessage.setText("Unable to get chat administrators!");
-                return sendMessage;
-            }
-
-            boolean isAdmin = false;
-            for (int i = 0; i < chatMembers.size(); i++) {
-                if (chatMembers.get(i).getUser().getId() == message.getFrom().getId()) {
-                    isAdmin = true;
-                    break;
-                }
-            }
-
-            if (!isAdmin) {
-                sendMessage.setText("You must be an admin to end the book!");
-                return sendMessage;
-            }
-        }
-
         bookGroupService.endBook(message.getChatId());
         sendMessage.setText("Book ended!\n");
 
