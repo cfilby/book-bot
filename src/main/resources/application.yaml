@@ -1,3 +1,8 @@
 spring:
   application:
     name: BookClubBot
+
+jpa:
+  properties:
+    hibernate:
+      dialect: org.hibernate.dialect.PostgreSQLDialect
