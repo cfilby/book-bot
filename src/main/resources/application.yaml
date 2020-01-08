@@ -2,6 +2,7 @@ spring:
   application:
     name: BookClubBot
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: create-drop
 
