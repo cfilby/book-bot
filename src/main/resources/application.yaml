@@ -1,6 +1,9 @@
 spring:
   application:
     name: BookClubBot
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
 
 jpa:
   properties:
